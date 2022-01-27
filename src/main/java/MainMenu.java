@@ -1,3 +1,5 @@
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class MainMenu {
@@ -11,10 +13,23 @@ public class MainMenu {
         showMainMenu();
     }
 
+    private String getLocalIP() {
+        String localIp = "~can't be identified~";
+        try {
+            localIp = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return localIp;
+    }
+
     private void showMainMenu() {
         String op;
+        String ip = getLocalIP();
         do {
             System.out.println("      ~P2P CONNECTION SERVICE ~       ");
+            System.out.println("Your IP is "+ip);
+            System.out.println();
             System.out.println(" ______________________________________");
             System.out.println("|                                      |");
             System.out.println("| 1. Create server                     |");
@@ -34,14 +49,12 @@ public class MainMenu {
     }
 
     private void showClientMenu() {
-        String op = "0";
 
         System.out.println("      ~P2P CONNECTION SERVICE ~       ");
         System.out.println(" ______________________________________");
         System.out.println("|                                      |");
         System.out.println("| 1. Enter IP address                  |");
         String ip = reader.nextLine();
-        op = reader.nextLine();
         mainTask.createClientConnection(ip, 8060);
     }
 

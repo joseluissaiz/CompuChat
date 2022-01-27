@@ -1,14 +1,15 @@
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.List;
 
 public class ServerConnector implements Runnable {
     private ServerSocket serverSocket;
     private int port;
-    private P2PTask mainTask;
+    private List<Connection> connections;
 
-    public ServerConnector(int port, P2PTask mainTask) {
+    public ServerConnector(int port, List<Connection> connections) {
         this.port = port;
-        this.mainTask = mainTask;
+        this.connections = connections;
         openPort();
     }
 
@@ -56,8 +57,11 @@ public class ServerConnector implements Runnable {
 
     private void getRequests() {
         try {
-            mainTask.getConnectionList().add(new Connection(serverSocket.accept()));
-        } catch (IOException e) {
+            Thread.sleep(15);
+            Connection connection = new Connection(serverSocket.accept());
+            connections.add(connection);
+            connection.sendMessage("Hello friend! Welcome to my chat service!");
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

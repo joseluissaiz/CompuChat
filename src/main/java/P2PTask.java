@@ -21,7 +21,7 @@ public class P2PTask {
     }
 
     public void createServerListener() {
-        serverConnector = new ServerConnector(8060, getInstance());
+        serverConnector = new ServerConnector(8060, connectionList);
     }
 
     public void createClientConnection(String  ip, int port) {
