@@ -24,8 +24,8 @@ public class P2PTask {
         serverConnector = new ServerConnector(8060, connectionList);
     }
 
-    public void createClientConnection(String  ip, int port) {
-        clientConnector = new ClientConnector(ip, port);
+    public void createClientConnection(String  ip) {
+        clientConnector = new ClientConnector(ip, connectionList);
     }
 
     // DTO

@@ -55,7 +55,7 @@ public class MainMenu {
         System.out.println("|                                      |");
         System.out.println("| 1. Enter IP address                  |");
         String ip = reader.nextLine();
-        mainTask.createClientConnection(ip, 8060);
+        mainTask.createClientConnection(ip);
     }
 
 }

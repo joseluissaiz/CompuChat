@@ -17,6 +17,7 @@ public class Connection implements Runnable {
         this.port = socket.getPort();
         System.out.printf("Connection created with %s on port %n\n",ip, port);
         createBuffers();
+        sendMessage("Hola apruebame porfis");
     }
 
     private void createBuffers() {
@@ -26,6 +27,7 @@ public class Connection implements Runnable {
             bufferReader = new BufferedReader(inputStreamReader);
             outputStream = socket.getOutputStream();
         } catch (IOException e) {
+            System.err.println("Cannot create the buffers");
             e.printStackTrace();
         }
     }
@@ -74,6 +76,7 @@ public class Connection implements Runnable {
             outputStream.write(message.getBytes());
             outputStream.flush();
         } catch (IOException e) {
+            System.err.println("Couldn't send the message");
             e.printStackTrace();
         }
     }
