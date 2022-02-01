@@ -53,16 +53,14 @@ public class Connection implements Runnable {
     }
 
     private void readMessages() {
-        String line = "";
-        String buffer;
+        String input;
 
         // Read our message
         try {
-            while((buffer = bufferReader.readLine()) != null){
-                line = line.concat(buffer);
+            while(!(input = bufferReader.readLine()).isEmpty()){
+                // Print the result
+                System.out.println(ip+": "+input);
             }
-            // Print the result
-            System.out.println(ip+": "+line);
         } catch (IOException e) {
             // Can't read that line
             System.err.println("Could not read line in buffered reader");
@@ -73,8 +71,10 @@ public class Connection implements Runnable {
     public void sendMessage(String message) {
         // Send message to the socket ip destination
         try {
+            System.out.println("Trying to send message...");
             outputStream.write(message.getBytes());
             outputStream.flush();
+            System.out.println("Sended");
         } catch (IOException e) {
             System.err.println("Couldn't send the message");
             e.printStackTrace();
