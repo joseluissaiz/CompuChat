@@ -1,6 +1,7 @@
 package Marc.Model;
 
 import Marc.Controller.Controller;
+import jdk.swing.interop.SwingInterOpUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -39,6 +40,7 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket socket = serverSocket.accept();
+                System.out.println(socket.getInetAddress().getHostAddress());
                 controller.createConnection(socket);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
