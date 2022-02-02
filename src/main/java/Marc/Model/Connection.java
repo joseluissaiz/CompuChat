@@ -14,6 +14,7 @@ public class Connection implements Runnable {
 
 
     public final String IP;
+    public final int PORT;
 
     public final Queue<String> messageQueue = new LinkedList<>();
     private final DataInputStream input;
@@ -24,19 +25,12 @@ public class Connection implements Runnable {
     //Constructor
 
 
-    public Connection(Socket socket) {
-        this.socket = socket;
-        IP = socket.getInetAddress().getHostAddress();
-        DataInputStream i = null;
-        DataOutputStream o = null;
-        try {
-            i = new DataInputStream(socket.getInputStream());
-            o = new DataOutputStream(socket.getOutputStream());
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        input = i;
-        output = o;
+    public Connection(Socket socket) throws IOException {
+        this.IP = socket.getInetAddress().getHostAddress();
+        this.PORT = socket.getPort();
+        this.socket = new Socket(IP, PORT);
+        this.input = new DataInputStream(socket.getInputStream());
+        this.output = new DataOutputStream(socket.getOutputStream());
     }
 
 
@@ -63,4 +57,5 @@ public class Connection implements Runnable {
             ioException.printStackTrace();
         }
     }
+
 }
