@@ -28,7 +28,7 @@ public class Connection implements Runnable {
     public Connection(Socket socket) throws IOException {
         this.IP = socket.getInetAddress().getHostAddress();
         this.PORT = socket.getPort();
-        this.socket = new Socket(IP, PORT);
+        this.socket = socket;
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
     }
