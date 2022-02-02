@@ -1,11 +1,14 @@
 package Marc.View;
 
+import Marc.Controller.Controller;
 import Marc.Model.Connection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 
 import static java.awt.GridBagConstraints.BOTH;
+import static java.lang.Thread.sleep;
 
 public class ChatPanel extends JPanel implements Runnable {
 
@@ -13,23 +16,24 @@ public class ChatPanel extends JPanel implements Runnable {
     //Attributes
 
 
+    private  final Controller controller;
+
+    public final Connection connection;
     private final JTextArea output = new JTextArea();
     private final JTextField input = new JTextField();
     private final JButton send = new JButton("Send");
-    private final Connection connection;
 
 
     //Constructor
 
 
-    public ChatPanel(Connection connection) {
-
-        this.connection = connection;
-        output.append("New connection created with "+ connection.IP);
+    public ChatPanel(Controller controller, String ip) {
+        this.controller = controller;
+        this.connection = controller.connections.get(ip);
+        output.append("New connection created with "+ connection.IP + "\n\n");
         addComponents();
         addListeners();
         output.setEditable(false);
-
     }
 
 
@@ -40,8 +44,13 @@ public class ChatPanel extends JPanel implements Runnable {
     public void run() {
         while (true) {
             if (!connection.messageQueue.isEmpty()) {
-                String s = connection.messageQueue.poll();
-                output.append("\n"+s);
+                String msg = connection.messageQueue.poll();
+                addMessage(connection.IP, msg);
+            }
+            try {
+                sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -70,12 +79,23 @@ public class ChatPanel extends JPanel implements Runnable {
     }
 
     public void addListeners() {
-        send.addActionListener(e->{
+
+        ActionListener messageSender = e -> {
             String msg = input.getText();
             if (msg.isBlank()) {return;}
+            addMessage(controller.IP,msg);
             connection.sendMessage(msg);
             input.setText("");
-        });
+        };
+
+        send.addActionListener(messageSender);
+
+        input.addActionListener(messageSender);
     }
+
+    private void addMessage(String sender, String message) {
+        output.append("    [" + sender + "] - "+message+"\n");
+    }
+
 
 }

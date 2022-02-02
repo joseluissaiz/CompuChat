@@ -4,6 +4,7 @@ import Marc.Model.ClientConnector;
 import Marc.Model.Connection;
 import Marc.Model.Server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -16,7 +17,7 @@ public class Controller {
 
 
     public final String IP;
-    public final int PORT = 7070;
+    public final int PORT;
 
     public final HashMap<String, Connection> connections = new HashMap<>();
     public final Server server;
@@ -26,63 +27,39 @@ public class Controller {
     //Constructor
 
 
-    public Controller() {
-        String ip = null;
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        IP = ip;
-        server = new Server(this);
-        clientConnector = new ClientConnector(this);
-        runThreads();
+    public Controller(int port) throws IOException {
+        this.PORT = port;
+        this.IP = InetAddress.getLocalHost().getHostAddress();
+        this.server = new Server(this);
+        this.clientConnector = new ClientConnector(this);
     }
 
 
     //Methods
 
 
-    private void runThreads() {
-        new Thread(server).start();
-        new Thread(clientConnector).start();
-    }
-
-    public void addNewConnection(String ip) {
-        new Thread(()->{
-            Connection c = clientConnector.connectTo(ip);
-            connections.put(c.IP,c);
-            new Thread(c).start();
-        }).start();
-    }
-
-    public void addNewConnection(Socket s) {
-        new Thread(()->{
-            Connection c = new Connection(s);
-            connections.put(c.IP,c);
-            new Thread(c).start();
-        }).start();
+    public void createConnection(Socket socket) {
+        if (socket == null) {return;}
+        try {
+            Connection connection = new Connection(socket);
+            connections.put(connection.IP, connection);
+        } catch (IOException ioException) {
+        }
     }
 
     public boolean isValidIP (String ip) {
-        try {
-            if ( ip == null || ip.isBlank() ) { return false; }
-
-            String[] parts = ip.split( "\\." );
-            if ( parts.length != 4 ) { return false; }
-
-            for ( String s : parts ) {
-                int i = Integer.parseInt( s );
-                if ( (i < 0) || (i > 255) ) {
-                    return false;
-                }
+        ip = ip.trim();
+        if (ip.isEmpty()) {return false;}
+        String[] s = ip.split("\\.");
+        if (s.length != 4) {return false;}
+        for (int i = 0; ++i<4;) {
+            try {
+                int b = Integer.parseInt(s[i]);
+                if (b > 255 || b < 0) {return false;}
+            } catch (Exception e) {
+                return false;
             }
-
-            if ( ip.endsWith(".") ) { return false; }
-            return true;
-
-        } catch (NumberFormatException nfe) {
-            return false;
         }
+        return true;
     }
 }

@@ -4,6 +4,7 @@ import Marc.Controller.Controller;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Server implements Runnable {
 
@@ -11,6 +12,7 @@ public class Server implements Runnable {
     //Attributes
 
 
+    private final String IP;
     private final int PORT;
 
     private final Controller controller;
@@ -20,16 +22,12 @@ public class Server implements Runnable {
     //Constructor
 
 
-    public Server(Controller controller) {
-        ServerSocket ss = null;
+    public Server(Controller controller) throws IOException {
+        this.IP = controller.IP;
+        this.PORT = controller.PORT;
         this.controller = controller;
-        PORT = controller.PORT;
-        try {
-            ss = new ServerSocket(PORT);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-        serverSocket = ss;
+        this.serverSocket = new ServerSocket(PORT);
+        new Thread(this).start();
     }
 
 
@@ -40,7 +38,8 @@ public class Server implements Runnable {
     public void run() {
         while (true) {
             try {
-                controller.addNewConnection(serverSocket.accept());
+                Socket socket = serverSocket.accept();
+                controller.createConnection(socket);
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
