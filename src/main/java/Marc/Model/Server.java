@@ -17,7 +17,7 @@ public class Server implements Runnable {
     private final int PORT;
 
     private final Controller controller;
-    private final ServerSocket serverSocket;
+    public final ServerSocket serverSocket;
 
 
     //Constructor

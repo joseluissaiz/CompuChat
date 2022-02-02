@@ -28,9 +28,9 @@ public class Controller {
 
 
     public Controller(int port) throws IOException {
-        this.PORT = port;
-        this.IP = InetAddress.getLocalHost().getHostAddress();
         this.server = new Server(this);
+        this.PORT = port;
+        this.IP = server.serverSocket.getInetAddress().getHostAddress();
         this.clientConnector = new ClientConnector(this);
     }
 
