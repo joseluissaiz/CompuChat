@@ -31,6 +31,7 @@ public class Connection implements Runnable {
         this.socket = socket;
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
+        new Thread(this).start();
     }
 
 
