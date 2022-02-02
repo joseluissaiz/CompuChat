@@ -92,7 +92,7 @@ public class Window extends JFrame {
     private void addListeners() {
         create.addActionListener(e -> {
             String ip = ipInput.getText();
-            if (controller.isValidIP(ip)) {
+            if (false && controller.isValidIP(ip)) {
                 alert.setText("is a not valid IP");
                 return;
             } else {
