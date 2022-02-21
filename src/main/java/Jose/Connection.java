@@ -1,3 +1,5 @@
+package Jose;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,7 +17,7 @@ public class Connection implements Runnable {
         this.socket = socket;
         this.ip = socket.getInetAddress().getHostAddress();
         this.port = socket.getPort();
-        System.out.printf("Connection created with %s on port %n\n",ip, port);
+        System.out.printf("Jose.Connection created with %s on port %n\n",ip, port);
         createBuffers();
         sendMessage("Hola apruebame porfis");
     }
