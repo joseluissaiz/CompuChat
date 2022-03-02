@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -107,6 +108,9 @@ public class Connection extends Thread {
     public String readData() {
         try {
             return in.readUTF();
+        } catch (SocketException e) {
+            close();
+            return null;
         } catch (IOException ioException) {
             ioException.printStackTrace();
             return null;
