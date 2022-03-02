@@ -64,10 +64,10 @@ public class Connection extends Thread {
     @Override
     public void run() {
         while (running && active) {
+            System.out.println(System.currentTimeMillis()-lastPing);
             String d = readData();
             if (d == null) continue;
             for (onDataReceivedListener listener : onDataReceivedListeners) listener.onDataReceived(d);
-            System.out.println(System.currentTimeMillis()-lastPing);
         }
         if (running) {
             for (onConnectionLostListener listener : onConnectionLostListeners) listener.onConnectionLost();

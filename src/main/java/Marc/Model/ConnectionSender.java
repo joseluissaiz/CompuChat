@@ -30,9 +30,9 @@ public class ConnectionSender extends Thread {
     @Override
     public void run() {
         while (running) {
-            for (String ip : ips) {
+            for (String ip : getIps()) {
                 createConnection(ip);
-                if (Connection.connections.get(ip) != null) ips.remove(ip);
+                if (Connection.connections.get(ip) != null) removeIp(ip);
             }
             try {
                 sleep(1000);
@@ -42,7 +42,15 @@ public class ConnectionSender extends Thread {
         }
     }
 
-    private void createConnection(String ip) {
+    private synchronized ArrayList<String> getIps() {
+         return new ArrayList<>(ips);
+    }
+
+    private synchronized void removeIp(String ip) {
+        ips.remove(ip);
+    }
+
+    private synchronized void createConnection(String ip) {
         try {
             Socket socket = new Socket(ip, Connection.PORT);
             Connection.createConnection(socket);

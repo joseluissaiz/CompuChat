@@ -27,7 +27,7 @@ public class ConnectionSaver extends Thread {
                 }
             }
             try {
-                sleep(100);
+                sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
