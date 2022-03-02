@@ -20,6 +20,18 @@ public class Connection extends Thread {
     public static final HashMap<String, Connection> connections = new HashMap<>();
     private static final ArrayList<onConnectionCreatedListener> onConnectionCreatedListeners = new ArrayList<>();
 
+    public static ConnectionSender connectionSender = new ConnectionSender();
+    public static ConnectionReceiver connectionReceiver;
+    public static ConnectionSaver connectionSaver = new ConnectionSaver();
+
+    static {
+        try {
+            connectionReceiver = new ConnectionReceiver();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
     //Instance
     public final String IP;
     private boolean active = true;
@@ -30,6 +42,8 @@ public class Connection extends Thread {
 
     private final ArrayList<onDataReceivedListener> onDataReceivedListeners = new ArrayList<>();
     private final ArrayList<onConnectionLostListener> onConnectionLostListeners = new ArrayList<>();
+
+    private long lastPing = System.currentTimeMillis();
 
 
     //Constructor
@@ -101,20 +115,29 @@ public class Connection extends Thread {
         onDataReceivedListeners.add(listener);
     }
 
-    public void close() {
+    public synchronized void close() {
         active = false;
     }
 
+    public long getLastPing() {
+        return lastPing;
+    }
+
     public String readData() {
+        String s = null;
         try {
-            return in.readUTF();
+            s = in.readUTF();
         } catch (SocketException e) {
             close();
-            return null;
         } catch (IOException ioException) {
             ioException.printStackTrace();
-            return null;
         }
+
+        if (s.equals("00")) {
+            lastPing = System.currentTimeMillis();
+        }
+
+        return s;
     }
 
     public void writeData(String d) {

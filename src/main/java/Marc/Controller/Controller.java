@@ -34,17 +34,15 @@ public class Controller {
     public Controller() throws IOException {
         chat.addSubmitListener((ip, port) -> {
             try {
-                HashMap<String, Connection> c = Connection.connections;
                 Connection.createConnection(new Socket(ip,Connection.PORT));
-                c.get(ip).addOnConnectionLostListener(() -> chat.closeTab(ip));
-                c.get(ip).addOnDataReceivedListener(d -> chat.getTab(ip).writeLine(String.valueOf(d)));
-
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
         });
         Connection.addOnConnectionCreatedListener( connection -> {
             createTab(connection.IP);
+            connection.addOnConnectionLostListener(() -> chat.closeTab(connection.IP));
+            connection.addOnDataReceivedListener(d -> chat.getTab(connection.IP).writeLine(String.valueOf(d)));
         });
     }
 
