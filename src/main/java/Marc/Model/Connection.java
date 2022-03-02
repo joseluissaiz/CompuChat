@@ -14,7 +14,7 @@ public class Connection extends Thread {
 
 
     //Static
-    public static boolean running;
+    public static boolean running = true;
     public static final int PORT = 7070;
     public static final HashMap<String, Connection> connections = new HashMap<>();
     private static final ArrayList<onConnectionCreatedListener> onConnectionCreatedListeners = new ArrayList<>();
