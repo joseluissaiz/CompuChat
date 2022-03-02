@@ -70,7 +70,6 @@ public class Connection extends Thread {
         if (running) {
             for (onConnectionLostListener listener : onConnectionLostListeners) listener.onConnectionLost();
             connections.remove(IP);
-            connectionSender.connectTo(IP);
             try {
                 socket.close();
             } catch (IOException ioException) {
@@ -90,8 +89,10 @@ public class Connection extends Thread {
             return;
         }
         try {
-
             Connection connection = new Connection(socket);
+            connection.addOnConnectionLostListener(() -> {
+                connectionSender.connectTo(connection.IP);
+            });
             connections.put(connection.IP, connection);
             for (onConnectionCreatedListener listener : onConnectionCreatedListeners)
                 listener.onConnectionCreated(connection);

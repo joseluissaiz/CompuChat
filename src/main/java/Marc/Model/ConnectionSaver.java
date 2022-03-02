@@ -21,7 +21,6 @@ public class ConnectionSaver extends Thread {
                 if(System.currentTimeMillis() - c.getLastPing() > 5000) {
                     String ip = c.IP;
                     c.close();
-                    Connection.connectionSender.connectTo(ip);
                 } else {
                     c.writeData("-ping-");
                 }
