@@ -1,4 +1,4 @@
-package Jose;
+package Jose.CompuChat.src;
 
 import java.util.ArrayList;
 import java.util.List;

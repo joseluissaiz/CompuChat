@@ -1,4 +1,4 @@
-package Jose;
+package Jose.CompuChat.src;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class Connection implements Runnable {
         this.socket = socket;
         this.ip = socket.getInetAddress().getHostAddress();
         this.port = socket.getPort();
-        System.out.printf("Jose.Connection created with %s on port %n\n",ip, port);
+        System.out.printf("Jose.CompuChat.src.Connection created with %s on port %n\n",ip, port);
         createBuffers();
         sendMessage("Hola apruebame porfis");
     }

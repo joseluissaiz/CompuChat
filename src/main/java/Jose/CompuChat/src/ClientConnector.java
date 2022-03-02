@@ -1,4 +1,4 @@
-package Jose;
+package Jose.CompuChat.src;
 
 import java.io.IOException;
 import java.net.Socket;
