@@ -129,11 +129,13 @@ public class Connection extends Thread {
             s = in.readUTF();
         } catch (SocketException e) {
             close();
+            return null;
         } catch (IOException ioException) {
             ioException.printStackTrace();
+            return null;
         }
 
-        if (s.equals("00")) {
+        if (s.equals("-ping-")) {
             lastPing = System.currentTimeMillis();
         }
 

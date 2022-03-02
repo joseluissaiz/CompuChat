@@ -42,14 +42,17 @@ public class Controller {
         Connection.addOnConnectionCreatedListener( connection -> {
             createTab(connection.IP);
             connection.addOnConnectionLostListener(() -> chat.closeTab(connection.IP));
-            connection.addOnDataReceivedListener(d -> chat.getTab(connection.IP).writeLine(String.valueOf(d)));
+            connection.addOnDataReceivedListener(d -> chat.getTab(connection.IP).writeLine("He/She/It: "+d));
         });
     }
 
     public void createTab(String ip) {
         chat.addTab(ip);
         ChatTab tab = chat.getTab(ip);
-        tab.addSendListener(d -> Connection.connections.get(ip).writeData(d));
+        tab.addSendListener(d -> {
+            Connection.connections.get(ip).writeData(d);
+            tab.writeLine("You: "+ d);
+        });
         tab.addCloseListener(i -> Connection.connections.get(ip).close());
     }
 
