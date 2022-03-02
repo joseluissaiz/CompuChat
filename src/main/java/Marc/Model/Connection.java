@@ -27,8 +27,7 @@ public class Connection extends Thread {
     static {
         try {
             connectionReceiver = new ConnectionReceiver();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
+        } catch (IOException ignored) {
         }
     }
 
@@ -64,7 +63,8 @@ public class Connection extends Thread {
     @Override
     public void run() {
         while (running && active) {
-            System.out.println(System.currentTimeMillis()-lastPing);
+            long t = System.currentTimeMillis()-lastPing;
+            if (t%50 == 0) System.out.println(t);
             String d = readData();
             if (d == null) continue;
             for (onDataReceivedListener listener : onDataReceivedListeners) listener.onDataReceived(d);
@@ -130,7 +130,6 @@ public class Connection extends Thread {
             close();
             return null;
         } catch (IOException ioException) {
-            ioException.printStackTrace();
             return null;
         }
 

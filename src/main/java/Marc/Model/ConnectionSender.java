@@ -33,6 +33,7 @@ public class ConnectionSender extends Thread {
             for (String ip : getIps()) {
                 createConnection(ip);
                 if (Connection.connections.get(ip) != null) removeIp(ip);
+                System.out.println(ip);
             }
             try {
                 sleep(1000);
