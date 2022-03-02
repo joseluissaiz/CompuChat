@@ -65,14 +65,13 @@ public class Connection extends Thread {
     public void run() {
         while (running && active) {
             String d = readData();
-            System.out.println("Message received: "+d);
             if (d == null) continue;
             for (onDataReceivedListener listener : onDataReceivedListeners) listener.onDataReceived(d);
+            System.out.println(System.currentTimeMillis()-lastPing);
         }
         if (running) {
             for (onConnectionLostListener listener : onConnectionLostListeners) listener.onConnectionLost();
             connections.remove(IP);
-            System.out.println("Connection Closed");
             try {
                 socket.close();
             } catch (IOException ioException) {
@@ -124,7 +123,7 @@ public class Connection extends Thread {
     }
 
     public String readData() {
-        String s = null;
+        String s;
         try {
             s = in.readUTF();
         } catch (SocketException e) {
@@ -137,6 +136,7 @@ public class Connection extends Thread {
 
         if (s.equals("-ping-")) {
             lastPing = System.currentTimeMillis();
+            s = null;
         }
 
         return s;
@@ -144,7 +144,6 @@ public class Connection extends Thread {
 
     public void writeData(String d) {
         try {
-            System.out.println("Message sended: "+d);
             out.writeUTF(d);
         } catch (IOException ioException) {
             ioException.printStackTrace();
