@@ -4,34 +4,42 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-public class Connection implements Runnable {
+public class Connection extends Thread {
 
 
     //Attributes
 
 
-    public final String IP;
-    public final int PORT;
+    //Static
+    public static boolean running;
+    public static final int PORT = 7070;
+    public static final HashMap<String, Connection> connections = new HashMap<>();
+    private static final ArrayList<onConnectionCreatedListener> onConnectionCreatedListeners = new ArrayList<>();
 
-    public final Queue<String> messageQueue = new LinkedList<>();
-    private final DataInputStream input;
-    private final DataOutputStream output;
+    //Instance
+    public final String IP;
+    private boolean active = true;
+
     private final Socket socket;
+    private final DataInputStream in;
+    private final DataOutputStream out;
+
+    private final ArrayList<onDataReceivedListener> onDataReceivedListeners = new ArrayList<>();
+    private final ArrayList<onConnectionLostListener> onConnectionLostListeners = new ArrayList<>();
 
 
     //Constructor
 
 
-    public Connection(Socket socket) throws IOException {
+    private Connection(Socket socket) throws IOException {
         this.IP = socket.getInetAddress().getHostAddress();
-        this.PORT = socket.getPort();
         this.socket = socket;
-        this.input = new DataInputStream(socket.getInputStream());
-        this.output = new DataOutputStream(socket.getOutputStream());
-        new Thread(this).start();
+        this.in = new DataInputStream(socket.getInputStream());
+        this.out = new DataOutputStream(socket.getOutputStream());
+        this.start();
     }
 
 
@@ -40,23 +48,91 @@ public class Connection implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
-            String msg = null;
+        while (running && active) {
+            String d = readData();
+            if (d == null) continue;
+            for (onDataReceivedListener listener : onDataReceivedListeners) listener.onDataReceived(d);
+        }
+        if (running) {
+            for (onConnectionLostListener listener : onConnectionLostListeners) listener.onConnectionLost();
+            connections.remove(IP);
             try {
-                msg = input.readUTF();
+                socket.close();
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
-            messageQueue.add(msg);
         }
     }
 
-    public void sendMessage(String msg) {
+    public synchronized static void createConnection(Socket socket) {
+        if (socket == null) return;
+        if (connections.get(socket.getInetAddress().getHostAddress()) != null) {
+            try {
+                socket.close();
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            return;
+        }
         try {
-            output.writeUTF(msg);
+
+            Connection connection = new Connection(socket);
+            connections.put(connection.IP, connection);
+            for (onConnectionCreatedListener listener : onConnectionCreatedListeners)
+                listener.onConnectionCreated(connection);
+
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
+    }
+
+    public static void addOnConnectionCreatedListener(onConnectionCreatedListener listener) {
+        onConnectionCreatedListeners.add(listener);
+    }
+
+    public void addOnConnectionLostListener(onConnectionLostListener listener) {
+        onConnectionLostListeners.add(listener);
+    }
+
+    public void addOnDataReceivedListener(onDataReceivedListener listener) {
+        onDataReceivedListeners.add(listener);
+    }
+
+    public void close() {
+        active = false;
+    }
+
+    public String readData() {
+        try {
+            return in.readUTF();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+            return null;
+        }
+    }
+
+    public void writeData(String d) {
+        try {
+            out.writeUTF(d);
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
+
+    //Listeners
+
+
+    public interface onConnectionCreatedListener {
+        void onConnectionCreated(Connection connection);
+    }
+
+    public interface onConnectionLostListener {
+        void onConnectionLost();
+    }
+
+    public interface onDataReceivedListener {
+        void onDataReceived(String data);
     }
 
 }

@@ -1,13 +1,18 @@
 package Marc.Controller;
 
-import Marc.Model.ClientConnector;
 import Marc.Model.Connection;
-import Marc.Model.Server;
+import Marc.Model.ConnectionReceiver;
+import Marc.Model.ConnectionSender;
+import Marc.View.ChatPanel;
+import Marc.View.ChatTab;
 
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 
 public class Controller {
@@ -16,50 +21,84 @@ public class Controller {
     //Attributes
 
 
-    public final String IP;
-    public final int PORT;
+    public ConnectionReceiver connectionReceiver = new ConnectionReceiver();
+    public ConnectionSender connectionSender = new ConnectionSender();
 
-    public final HashMap<String, Connection> connections = new HashMap<>();
-    public final Server server;
-    public final ClientConnector clientConnector;
+    public final ChatPanel chat = new ChatPanel("IP - " + InetAddress.getLocalHost().getHostAddress(),
+            "Receiver", "IP: ", "PORT: ", "Send");
 
 
     //Constructor
 
 
-    public Controller(int port) throws IOException {
-        this.PORT = port;
-        this.IP = InetAddress.getLocalHost().getHostAddress();
-        this.server = new Server(this);
-        this.clientConnector = new ClientConnector(this);
-    }
-
-
-    //Methods
-
-
-    public void createConnection(Socket socket) {
-        if (socket == null) {return;}
-        try {
-            Connection connection = new Connection(socket);
-            connections.put(connection.IP, connection);
-        } catch (IOException ioException) {
-        }
-    }
-
-    public boolean isValidIP (String ip) {
-        ip = ip.trim();
-        if (ip.isEmpty()) {return false;}
-        String[] s = ip.split("\\.");
-        if (s.length != 4) {return false;}
-        for (int i = 0; ++i<4;) {
+    public Controller() throws IOException {
+        chat.addSubmitListener((ip, port) -> {
             try {
-                int b = Integer.parseInt(s[i]);
-                if (b > 255 || b < 0) {return false;}
-            } catch (Exception e) {
-                return false;
+                HashMap<String, Connection> c = Connection.connections;
+                Connection.createConnection(new Socket(ip,Connection.PORT));
+                c.get(ip).addOnConnectionLostListener(() -> chat.closeTab(ip));
+                c.get(ip).addOnDataReceivedListener(d -> chat.getTab(ip).writeLine(String.valueOf(d)));
+
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
             }
-        }
-        return true;
+        });
+        Connection.addOnConnectionCreatedListener( connection -> {
+            createTab(connection.IP);
+        });
     }
+
+    public void createTab(String ip) {
+        chat.addTab(ip);
+        ChatTab tab = chat.getTab(ip);
+        tab.addSendListener(d -> Connection.connections.get(ip).writeData(d));
+        tab.addCloseListener(i -> Connection.connections.get(ip).close());
+    }
+
+    public void launch() {
+        JFrame f = new JFrame();
+        f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        f.setExtendedState(Frame.MAXIMIZED_BOTH);
+        f.setMinimumSize(new Dimension(800, 500));
+        f.getContentPane().add(chat);
+        f.addWindowListener(new WindowListener() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                Connection.running = false;
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
+            }
+        });
+        f.setVisible(true);
+    }
+
+
 }
