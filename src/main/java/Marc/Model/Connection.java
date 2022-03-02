@@ -63,8 +63,6 @@ public class Connection extends Thread {
     @Override
     public void run() {
         while (running && active) {
-            long t = System.currentTimeMillis()-lastPing;
-            if (t%50 == 0) System.out.println(t);
             String d = readData();
             if (d == null) continue;
             for (onDataReceivedListener listener : onDataReceivedListeners) listener.onDataReceived(d);
@@ -72,6 +70,7 @@ public class Connection extends Thread {
         if (running) {
             for (onConnectionLostListener listener : onConnectionLostListeners) listener.onConnectionLost();
             connections.remove(IP);
+            connectionSender.connectTo(IP);
             try {
                 socket.close();
             } catch (IOException ioException) {
